@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>Orpheus Music</title>
+		<link type="text/css" rel="stylesheet" href="/static/main.css" />
+        <style type="text/css">
+            input[type=text] {
+                width: 90%;
+                height: 80px;
+                font-size: 70px;
+                padding: 2px;
+                border: 1px solid #000;
+                border-radius: 15px;
+            }
+
+            input[type=submit] {
+                width: 40%;
+                height: 70px;
+                font-size: 60px;
+                padding: 2px;
+                border: 1px solid #000;
+                border-radius: 15px;
+            }
+        </style>
+    	<script type="text/javascript">
+			function chill() {
+    			document.getElementById("value").value="more chill";
+    			document.button_value.submit();
+			}
+			function bangin() {
+    			document.getElementById("value").value="more bangin";
+    			document.button_value.submit();
+			}
+			function louder() {
+    			document.getElementById("value").value="louder";
+    			document.button_value.submit();
+			}
+			function softer() {
+    			document.getElementById("value").value="softer";
+    			document.button_value.submit();
+			}
+			function skip() {
+    			document.getElementById("value").value="skip";
+    			document.button_value.submit();
+			}
+		</script>
+
+	</head>
+
+	<body>
+		<img src="http://i.imgur.com/uceAG8d.png" width="80%"><br>
+
+		<!--<div class="track" id="playing">{{now_playing}}</div><br>-->
+    <div class="track">Now playing:<br>Thrift Shop - Macklemore</div><br><br>
+    <div class="vote">Vote for a song</div><br>
+
+    <button class="button" type="button" name="skip" onclick="skip()">The Way - Ariana Grande</button><br><br>
+		<button class="button" type="button" name="chill" onclick="chill()">Started From the Bottom - Drake</button><br><br>
+		<button class="button" type="button" name="bangin" onclick="bangin()">Harlem Shake - Baauer</button><br><br>
+		<button class="button" type="button" name="louder" onclick="louder()">Radioactive - Imagine Dragons</button><br><br>
+		<!--<button class="button" type="button" name="softer" onclick="softer()">Stay</button><br><br>-->
+
+		
+		<form method="post" name="button_value" id="button_value">
+			<input id="value" type="hidden" value="" name="button_pressed">
+			Request a song<br>
+			<input type="text" name="user_input" style="width: 90%; height: 80px; font-size: 70px; padding: 2px; border: 1px solid #000; border-radius: 15px"><br>
+			<input type="submit" value="Submit">
+		</form>
+
+        <br>
+
+		<!--<div class="track">{{message}}</div>-->
+
+	</body>
+</html>

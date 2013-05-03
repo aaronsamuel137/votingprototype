@@ -1,0 +1,161 @@
+body {
+	font-family: verdana;
+	background-color: #672199;
+}
+
+h1, h2, h3 {
+	color: white;
+    text-align: center;
+}
+
+h1 {
+    font-size: 60px;
+}
+
+h2 {
+    font-size: 40px;
+}
+
+h2 {
+    font-size: 30px;
+}
+
+#left, #right {
+    border: 1px solid #000;
+    text-align: left;
+    width: 40%;
+    margin: 0 auto;
+    padding: 2em;
+    background-color: #3f3f3f;
+    color: white;
+}
+
+#left {
+    float: left;
+}
+
+#right {
+    float: right;
+}
+
+.right_align {
+    float: right;
+}
+
+.user {
+    font-size: 15px;
+    text-align: center
+}
+
+.mobile_form {
+	background-color: #ccc;
+	margin: auto;
+	position: relative;
+	width: 88%;
+	padding: 15px;
+	border: 2px solid #000;
+	border: inset 1px solid #333;
+    border-radius: 15px;
+    font-size: 50px;
+    color: black;
+}
+
+.results {
+    margin: auto;
+    position: relative;
+    width: 88%;
+    font-size: 50px;
+    color: white;
+    width: 80%;
+    text-align: left;
+}
+
+.mobile_form input[type=text] {
+    width: 90%;
+    height: 55px;
+    font-size: 50px;
+    padding: 2px;
+    border: 1px solid #000;
+    border-radius: 15px;
+}
+
+.buttonHolder{ text-align: center; }
+
+.mobile_form input[type=submit] {
+    width: 40%;
+    height: 70px;
+    font-size: 60px;
+    padding: 2px;
+    border: 1px solid #000;
+    border-radius: 15px;
+    margin: auto 0;
+    text-align: center;
+}   
+
+.links {
+    float: right;
+    margin-right: 20px;
+    color: white;
+}
+
+a {
+    color: white;
+}
+
+.track {
+    color: white;
+    font-size: 60px;
+    font-family: "Arial Black", Gadget, sans-serif;
+    margin: auto;
+    position: relative;
+    width: 90%;
+    font-size: 75px;
+    color: white;
+    padding: 10px;
+    border-radius: 15px;
+    border: 2px solid white;
+}
+
+.vote {
+    color: white;
+    font-size: 60px;
+}
+
+.button {
+    background-color: #ccc;
+    margin: auto;
+    position: relative;
+    width: 90%;
+    font-size: 75px;
+    padding: 10px;
+    border-radius: 15px;
+    border: 2px solid #000;
+    color: black;
+}
+
+.skip {
+    background-color: #ccc;
+    width: 200px;
+    height: 100px;
+    font-size: 75px;
+    padding: 10px;
+    border-radius: 15px;
+    border: 2px solid #000;
+    color: black;
+}
+
+.box {
+	border: 1px solid #000;
+    text-align: left;
+    width: 90%;
+    margin: 0 auto;
+    padding: 2em;
+    background-color: #3f3f3f;
+    color: white;
+}
+
+.input_view {
+    padding: 10px;
+    border: 1px solid #000;
+    border: inset 1px solid #333;
+}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Orpheus - Vote for a song{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+    <h1>Vote for the next song!</h1>
+    <script>
+        channel = new goog.appengine.Channel('{{ token }}');
+        socket = channel.open();
+        socket.onopen = onOpened;
+        socket.onmessage = onMessage;
+        socket.onerror = onError;
+        socket.onclose = onClose;
+    </script>
+
+    <span class="align_right" id="test"></span>
+    <form class="mobile_form" action="/vote" method="post">
+        <strong>Song<span class="right_align">Votes</span></strong><br>
+        {% for song, votes in songs %}
+            <input type="radio" name="vote" value="{{song}}">{{song}}
+            <span class="right_align" id="{{song}}">{{votes}}</span>
+            <br><br>
+        {% endfor %}
+        <br><br>
+        <div class="buttonHolder">
+            Suggestions?<br>
+            <input type="text" name="suggestion"><br><br>
+            <input type="submit" value="Submit">
+        </div>
+        <!--<div class="user">user: {{user}}</div>-->
+    </form>
+{% endblock %}
