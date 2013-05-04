@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Orpheus - Vote for a song{% endblock %}
+{% block head %}
+    {{ super() }}
+    <script type="text/javascript">
+        onMessage = function(message) {
+            console.error("err");
+            var loc = String(window.location);
+            re = /[\,]/g;
+            console.error(loc);
+            var new_loc = loc.replace("no_vote", "vote");
+            console.error(new_loc);
+            window.location = new_loc;
+        }
+    </script>
+{% endblock %}
+{% block content %}
+    <h1>Vote for the next song!</h1>
+    <script>
+        channel = new goog.appengine.Channel('{{ token }}');
+        socket = channel.open();
+        socket.onopen = onOpened;
+        socket.onmessage = onMessage;
+        socket.onerror = onError;
+        socket.onclose = onClose;
+    </script>
+
+    <div class="mobile_form">
+        No votes up yet.
+    </div>
+{% endblock %}

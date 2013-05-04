@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Orpheus - Vote for a song{% endblock %}
+{% block head %}
+    {{ super() }}
+
+{% endblock %}
+{% block content %}
+
+    <img width="100%" src="http://i.imgur.com/uceAG8d.png">
+    <div id="buttons" class="landing">
+        <p>Orpheus is a digital DJ/Jukebox streaming music service for restaurants, bars,
+         coffeeshops, and house parties. It uses social media and machine learning to play 
+         music that is relevant to guests and patrons.</p><br><br><br><br>
+         <form method="post">
+            Signup for our private beta:<br>
+            <input type="text" name="signup"><br>
+            <input type="submit" value="Submit">
+        </form><br>
+        {{message}}
+    </div>
+
+{% endblock %}

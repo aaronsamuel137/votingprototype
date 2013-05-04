@@ -2,6 +2,7 @@
 {% block title %}Orpheus - Vote for a song{% endblock %}
 {% block head %}
     {{ super() }}
+
 {% endblock %}
 {% block content %}
     <h1>Vote for the next song!</h1>
@@ -15,19 +16,24 @@
     </script>
 
     <span class="align_right" id="test"></span>
-    <form class="mobile_form" action="/vote" method="post">
-        <strong>Song<span class="right_align">Votes</span></strong><br>
-        {% for song, votes in songs %}
-            <input type="radio" name="vote" value="{{song}}">{{song}}
-            <span class="right_align" id="{{song}}">{{votes}}</span>
+    <div class="mobile_form">
+        <form action="/vote" method="post">
+            <strong>Song<span class="right_align">Votes</span></strong><br>
+            {% for song, votes, name in songs %}
+                {{name | safe}}
+                <!--<input class="radio" type="radio" name="vote" value="{{song}}">{{song}}-->
+                <span class="right_align" id="{{song}}">{{votes}}</span>
+                <input type="hidden" name="vote" value="{{song}}" id="{{song}}">
+                <br><br>
+            {% endfor %}
             <br><br>
-        {% endfor %}
-        <br><br>
-        <div class="buttonHolder">
-            Suggestions?<br>
-            <input type="text" name="suggestion"><br><br>
-            <input type="submit" value="Submit">
-        </div>
-        <!--<div class="user">user: {{user}}</div>-->
-    </form>
+            <div class="buttonHolder">
+                Suggestions?<br>
+                <input type="text" name="suggestion"><br><br>
+                <input type="submit" value="Submit">
+            </div><br>
+            <div class="message">{{message | safe}}</div>
+            <!--<div class="user">user: {{user}}</div>-->
+        </form>
+    </div>
 {% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Orpheus - Vote for a song{% endblock %}
+{% block head %}
+    {{ super() }}
+
+{% endblock %}
+{% block content %}
+    <h1>Vote for the next song!</h1>
+    <script>
+        channel = new goog.appengine.Channel('{{ token }}');
+        socket = channel.open();
+        socket.onopen = onOpened;
+        socket.onmessage = onMessage;
+        socket.onerror = onError;
+        socket.onclose = onClose;
+    </script>
+
+    <div id="buttons" class="mobile_form">
+        <script type="text/javascript">
+            var div = document.getElementById('buttons');
+            var btn=document.createElement("BUTTON");
+            btn.setAttribute('class', 'button');
+            var t = document.createTextNode("{{message}}");
+            btn.appendChild(t);
+            div.appendChild(btn);
+            var obj = {{lst | safe}};
+
+            for (var i = 0; i < 3; i++) {  
+                var btn = document.createElement("BUTTON");
+                btn.setAttribute('class', 'button');
+                var t = document.createTextNode("{{message}}");
+                btn.appendChild(t);
+                div.appendChild(btn);
+                btn.onclick = (function() {
+                    var currentI = i;
+                    return function() {
+                        alert(obj.iam[currentI]);
+                    }
+                })();
+            }
+        </script>
+    </div>
+{% endblock %}

@@ -2,12 +2,7 @@
 {% block title %}Orpheus - Dataview{% endblock %}
 {% block head %}
     {{ super() }}
-    <script type="text/javascript">
-        function next_vote() {
-            document.getElementById("gn").value="more chill";
-            document.button_value.submit();
-        }
-    </script>
+
 {% endblock %}
 {% block content %}
 
@@ -22,6 +17,7 @@
 
     <h2>Orpheus Dataview</h2>
     <div class="links">
+        <a href="/queue">refresh</a>
         <a href="/vote">vote page</a>
     </div>
     <br>
@@ -66,6 +62,23 @@
             <input type="submit" value="Clear Users">
         </form>
     </div>
+    <br><br>
+    <div id="left">
+        <h3>Suggestions</h3>
+        {% for s in suggestions %}
+            {{s.suggestion | safe}}<span class="right_align">{{s.created.strftime('%c')}}</span><br>
+        {% endfor %}
+    </div>
+    <!--<div id="left">
+        <h3>Saved Votes</h3>
+        {% for entry in vote_db %}
+            Vote on {{entry['time']}}<br><br> 
+            {% for v in entry['votes'] %}
+                {{v[0] | safe}}<span class="right_align">{{v[1] | safe}}</span><br>
+            {% endfor %}
+            <br><br>
+        {% endfor %}
+    </div>-->
 
 {% endblock %}
 
