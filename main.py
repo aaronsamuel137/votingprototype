@@ -180,11 +180,17 @@ class VoteHandler(MainHandler):
         else:
             message = "Thanks for your vote!<br>You will be able to vote again on the next song"
         vote = self.request.get('vote')
+
+        logging.error(vote)
         if vote:
             self.vote(vote)
+
+        # if coming from queue page, redirect us back
         from_queue = self.request.get('from_queue')
         if from_queue:
             self.redirect('/queue')
+
+        # else register the vote normally
         else:
             voted = True
             songs = memcache.get(VOTE)
@@ -343,10 +349,12 @@ class TestHandler(MainHandler):
         self.render('/test.html', message = "test", lst =json.dumps(lst))
 
 # Not used yet, but might be able to moniter channels eventually
+"""
 class ChannelConnectedHandler(MainHandler):
     def post(self):
         client_id = self.request.get('from')
         self.send_update()
+"""
     
 
 app = webapp2.WSGIApplication([
@@ -356,6 +364,6 @@ app = webapp2.WSGIApplication([
     ('/next', NextHandler),
     ('/clear', ClearHandler),
     ('/test', TestHandler),
-    ('/no_vote', NoVoteHandler),
-    ('/_ah/channel/connected/', ChannelConnectedHandler)
+    ('/no_vote', NoVoteHandler)
+    #('/_ah/channel/connected/', ChannelConnectedHandler)
 ], debug=True)
