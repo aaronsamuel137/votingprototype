@@ -106,6 +106,7 @@ class MainHandler(webapp2.RequestHandler):
             token = channel.create_channel(client_id)
             self.add_channel(client_id)
         else:
+            token = None
             self.redirect('/login')
 
         return token
@@ -397,7 +398,7 @@ class NoVoteHandler(MainHandler):
         fb_user = self.current_user
         if fb_user:
             client_id = fb_user.id + CHANNEL_KEY
-            token = channel.create_channel(client_id)
+            token = get_token_fb()
         else:
             token = self.get_token()
         self.render('/no_vote.html', token = token)
@@ -435,6 +436,7 @@ class QueueHandler(MainHandler):
                           ["Awesome Song2", 0],
                           ["Awesome Song3", 0]]
             memcache.set(VOTE, vote_songs)
+            self.send_update(vote_songs)
 
         users = memcache.get(CHANNELS)
         likes = memcache.get(LIKES)
