@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Orpheus - Vote for a song{% endblock %}
+{% block head %}
+    {{ super() }}
+    <script>
+        function fbLogin() {
+            window.location = "http://localhost:8080/auth/login"
+        }
+        function anonLogin() {
+            document.login_form.submit();
+        }
+    </script>
+
+
+{% endblock %}
+{% block content %}
+    <h1>Welcome to Orpheus</h1>
+
+    <div class="mobile_form">
+        <button type="button" class="button" name="login_facebook" onclick="fbLogin()">Log in with Facebook</button><br>
+        <button type="button" class="button" name="login_anon" onclick="anonLogin()">Login Anonymously</button><br>
+    </div>
+    <form method="post" name="login_form">
+        <input type="hidden" value="" id="hidden">
+    </form>
+{% endblock %}
