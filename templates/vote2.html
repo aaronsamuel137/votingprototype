@@ -15,17 +15,20 @@
         socket.onclose = onClose;
     </script>
 
+    <div class="links">{{welcome}}
+        <a href="/auth/logout">Logout</a>
+    </div><br><br>
+
     <div id="buttons" class="mobile_form">
         <strong><span class="left_align">Song</span><span class="right_align">Votes</span></strong><br><br>
         <script type="text/javascript">
             var div = document.getElementById('buttons');
             var obj = {{songs | safe}};
-            console.error(obj.voted);
 
             for (var i = 0; i < 3; i++) {
                 var btn = document.createElement("BUTTON");
                 btn.setAttribute('class', 'button');
-                btn.setAttribute('id', obj.songs[i][0] + '_name')
+                btn.setAttribute('id', 'song' + i)
                 if (obj.voted === true)
                     btn.disabled = true;      
                 var t = document.createTextNode(obj.songs[i][0]);
@@ -33,7 +36,7 @@
                 var num_votes = document.createElement("SPAN");
                 num_votes.innerHTML = obj.songs[i][1];
                 num_votes.setAttribute('class', 'right_align');
-                num_votes.setAttribute('id', obj.songs[i][0])
+                num_votes.setAttribute('id', 'votes' + i)
                 btn.appendChild(t);
                 div.appendChild(btn);
                 div.appendChild(br);
@@ -44,7 +47,7 @@
                     return function() {
                         document.getElementById("vote").value=obj.songs[currentI][0];
                         document.button_submit.submit();
-                }
+                    }
 
                 })();
                 

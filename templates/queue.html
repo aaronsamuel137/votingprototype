@@ -2,6 +2,40 @@
 {% block title %}Orpheus - Dataview{% endblock %}
 {% block head %}
     {{ super() }}
+    <script type="text/javascript">
+        onMessage = function(message) {
+            var update = $.parseJSON(message.data);
+            var msg = update.kind;
+            switch (msg) {
+                case 'channels':
+                    document.location.reload(true);
+                    break;
+                case 'likes':
+                    document.location.reload(true);
+                    break;
+
+                    /*var div = document.getElementById('likes');
+                    for (var user in update.likes) {
+                        var name = document.createElement("SPAN");
+                        name.innerHTML = user;
+                        div.appendChild(name);
+                        for (var j = 0; j < user.length; j++) {
+                            var like = document.createElement("SPAN");
+                            like.setAttribute('class', 'right_align');
+                            like.innerHTML = update.likes.user[i];
+                            div.appendChild(like);
+                            var br = document.createElement("BR");
+                            div.appendChild(br);
+                        }
+                    }*/
+
+                case 'votes':
+                    for (var i = 0; i < 3; i++) {
+                        document.getElementById(update.votes[i][0]).innerHTML=update.votes[i][1];
+                    }
+            }
+        };
+    </script>
 
 {% endblock %}
 {% block content %}
@@ -21,7 +55,7 @@
         <a href="/vote">vote page</a>
     </div>
     <br>
-    <div id="left">
+    <div class="left">
         <form action="/queue" method="post">
             Queue:<br>
             {% for song in songs %}
@@ -37,9 +71,9 @@
         </form>
     </div>
     <br>
-    <div id="right">
+    <div class="right">
         <h3>Current Vote:</h3>
-        <form action="/vote", method="post">
+        <form action="/vote", method="post" id="votes">
             {% for song, votes in vote_songs %}
                 <input type="radio" name="vote" value="{{song}}">{{song}}
                 <span class="right_align" id="{{song}}">{{votes}}</span><br>
@@ -54,8 +88,8 @@
         </form>
         <br><br><br>
         <h3>Users logged on:</h3>
-        {% for user in users %}
-            {{user}}<br>
+        {% for key in users %}
+            {{users[key]}}<br>
         {% endfor %}
         <br>
         <form action="/clear" method="post">
@@ -63,11 +97,22 @@
         </form>
     </div>
     <br><br>
-    <div id="left">
+    <div class="left" id="suggestions">
         <h3>Suggestions</h3>
         {% for s in suggestions %}
-            {{s.suggestion | safe}}<span class="right_align">{{s.created.strftime('%c')}}</span><br>
+            {{s.suggestion | safe}}<span class="right_align">{{s.created.strftime('%I:%M %p') | safe}}</span><br>
         {% endfor %}
+    </div>
+    <div class="left">
+        <h3>Facebook likes</h3>
+        <div id="likes">
+            {% for user in likes %}
+                {{user | safe}}
+                {% for like in likes[user] %}
+                    <span class="right_align">{{like | safe}}</span><br>
+                {% endfor %}
+            {% endfor %}
+        </div>
     </div>
     <!--<div id="left">
         <h3>Saved Votes</h3>

@@ -37,7 +37,7 @@ h2 {
     float: left;
 }
 
-#left, #right {
+.left, .right {
     border: 1px solid #000;
     text-align: left;
     width: 40%;
@@ -47,11 +47,11 @@ h2 {
     color: white;
 }
 
-#left {
+.left {
     float: left;
 }
 
-#right {
+.right {
     float: right;
 }
 
@@ -112,6 +112,11 @@ h2 {
     border-radius: 15px;
 
 }
+
+.center_image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto }
 
 .buttonHolder{ text-align: center; }
 
