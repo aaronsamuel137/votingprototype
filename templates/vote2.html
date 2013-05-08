@@ -30,7 +30,7 @@
             var div = document.getElementById('buttons');
             var obj = {{songs | safe}};
 
-            for (var i = 0; i < 3; i++) {
+            for (var i = 0; i < obj.songs.length; i++) {
                 var btn = document.createElement("BUTTON");
                 btn.setAttribute('class', 'button');
                 btn.setAttribute('id', 'button' + i);

@@ -85,12 +85,7 @@ def counter():
     return count
 
 count = 0
-
-class Song:
-    def __init__(self, name, artist):
-        self.name = name
-        self.artist = artist
-
+has_voted = {}
 
 
 ### Handlers ###
@@ -114,13 +109,14 @@ class MainHandler(webapp2.RequestHandler):
             token = None
             self.redirect('/login')
 
-        return token
+        return token, client_id
 
     def get_admin_token(self):
         cookie = self.request.cookies.get('admin')
         if not cookie:
             cookie = util.make_cookie(20)
             self.response.headers.add_header('Set-Cookie', 'admin=%s; Path=/' % cookie)
+            
             admin_channels = memcache.get(ADMIN)
             if admin_channels: 
                 admin_channels.append(cookie + ADMIN_KEY)
@@ -139,6 +135,7 @@ class MainHandler(webapp2.RequestHandler):
         if not channels:
             channels = {}
         if client_id not in channels:
+            has_voted[client_id] = False
             if fb_user:
                 channels[client_id] = fb_user
             elif admin:
@@ -152,7 +149,7 @@ class MainHandler(webapp2.RequestHandler):
         token = channel.create_channel(client_id)
         self.add_channel(client_id, fb_user=fb_user.name)
         self.update_channels()
-        return token
+        return token, client_id
 
     def get_id(self):
         cookie = self.request.cookies.get('user')
@@ -186,6 +183,7 @@ class MainHandler(webapp2.RequestHandler):
     def update_channels(self):
         admin_channels = memcache.get(ADMIN)
         channels = memcache.get(CHANNELS)
+        logging.error(admin_channels)
         message = json.dumps({'channels': channels, 'kind': 'channels'})
         if admin_channels:
             for admin in admin_channels:
@@ -314,12 +312,12 @@ class VoteHandler(MainHandler):
         user_cookie = self.request.cookies.get('user')
         if fb_user:
             welcome = "Welcome " + fb_user.name + "!"
-            token = self.get_token_fb(fb_user)           
+            token, client_id = self.get_token_fb(fb_user)           
         
         # check if anonymous login   
         elif user_cookie:
             welcome = "Logged in"
-            token = self.get_token()
+            token, client_id = self.get_token()
 
         # if not logged in redirect to login
         else:
@@ -346,17 +344,18 @@ class VoteHandler(MainHandler):
         user_cookie = self.request.cookies.get('user')
         if fb_user:
             welcome = "Welcome " + fb_user.name + "!"
-            token = self.get_token_fb(fb_user)
+            token, client_id = self.get_token_fb(fb_user)
         
         # check if anonymous login   
         elif user_cookie:
             welcome = "Logged in"
-            token = self.get_token()
+            token, client_id = self.get_token()
 
         # if not logged in redirect to login
         else:
             token = None
             welcome = None
+            client_id = None
             self.redirect('/login')
 
         # if we get a suggestion, add to db
@@ -369,17 +368,23 @@ class VoteHandler(MainHandler):
         else:
             message = "Thanks for your vote!<br>You will be able to vote again on the next song"
 
-        vote = self.request.get('vote')
-        if vote:
-            self.vote(vote)
 
-        # if coming from queue page, redirect us back
         from_queue = self.request.get('from_queue')
-        if from_queue:
-            self.redirect('/queue')
+        vote = self.request.get('vote')
 
-        # else register the vote normally
-        else:
+        # if from admin page redirect us back
+        if from_queue:
+            if vote:
+                self.vote(vote)
+                self.redirect('/queue')
+
+        # else make sure people can't vote twice
+        # and render the vote page again
+        elif vote:
+            if not has_voted.get(client_id):
+                has_voted[client_id] = True
+                self.vote(vote)
+
             voted = True
             songs = memcache.get(VOTE)
             json_songs = {'songs': songs, 'voted': voted}
@@ -392,7 +397,6 @@ class VoteHandler(MainHandler):
         songs = memcache.get(VOTE)
         if songs:
             for song in songs:
-                logging.error(vote)
                 if song['vote_order'] == int(vote):
                     song['votes'] += 1
                     break
@@ -403,10 +407,9 @@ class NoVoteHandler(MainHandler):
     def get(self):
         fb_user = self.current_user
         if fb_user:
-            client_id = fb_user.id + CHANNEL_KEY
-            token = get_token_fb()
+            token, client_id = self.get_token_fb()
         else:
-            token = self.get_token()
+            token, client_id = self.get_token()
         self.render('/no_vote.html', token = token)
 
 
@@ -433,15 +436,7 @@ class QueueHandler(MainHandler):
                      {'song': "Mirrors", 'artist': "Justin Timberlake"},
                      {'song': "I'm on a Boat", 'artist': "T-Pain"},
                      {'song': "Harlem Shake", 'artist': "Baauer"},
-                     {'song': "DeadMau5", 'artist': "Strobe"}]
-            """
-            queue = ["Thrift Shop - Macklemore",
-                     "Thriller - Michael Jackson",
-                     "Mirrors - Justin Timberlake",
-                     "I'm on a Boat - T-Pain",
-                     "Harlem Shake - Baauer",
-                     "DeadMau5 - Strobe"]
-            """
+                     {'song': "Strobe", 'artist': "DeadMau5"}]
             memcache.set(QUEUE, queue)
 
         # If we don't have a vote ready, add a test vote
@@ -479,7 +474,9 @@ class QueueHandler(MainHandler):
         # just remove it and refresh the page
         remove = self.request.get('remove')
         if remove:
-            queue.remove(remove)
+            for i, song in enumerate(queue):
+                if song['song'] == remove:
+                    queue.pop(i)
             memcache.set(QUEUE, queue)
             self.redirect('/queue')
 
@@ -534,6 +531,10 @@ class NextHandler(MainHandler):
         # update the queue so the top three songs are removed
         queue = songs[3:]
         memcache.set(QUEUE, queue)
+
+        # let clients vote again
+        for client in has_voted:
+            has_voted[client] = False
 
         # send message to all channels to update
         self.send_update(vote, True, old_vote)

@@ -30,7 +30,7 @@
                     }*/
 
                 case 'votes':
-                    for (var i = 0; i < 3; i++) {
+                    for (var i = 0; i < update.votes.length; i++) {
                         document.getElementById(i + 1).innerHTML=update.votes[i].votes;
                     }
             }
@@ -59,7 +59,7 @@
         <form action="/queue" method="post">
             Queue:<br>
             {% for song in songs %}
-                <input type="radio" name="remove" value="{{song['song']}}">{{song['song']}}<br />
+                <input type="radio" name="remove" value="{{song['song']}}">{{song['song']}} - {{song['artist']}}<br>
             {% endfor %}
             <input type="submit" value="Remove"><br><br>
             Add to Queue:<br>
