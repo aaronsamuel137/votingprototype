@@ -29,7 +29,7 @@ onMessage = function(message) {
         }
     else
         for (var i = 0; i < 3; i++) {
-            document.getElementById('votes' + i).innerHTML=update.votes[i].votes;
+            document.getElementById('votes' + i).innerHTML = "Current Number of Votes " + update.votes[i].votes;
         }
 
 };

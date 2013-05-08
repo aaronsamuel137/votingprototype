@@ -20,13 +20,19 @@ h2 {
     font-size: 30px;
 }
 
+.header {
+    color: white;
+    text-align: center;
+    font-size: 60px;
+}
+
 .radio {
   width: 40px;
   height: 40px;
 }
 
 .message {
-    color: black;
+    color: white;
     text-align: center;
     font-size: 30px;
 }
@@ -80,17 +86,18 @@ h2 {
 }
 
 .mobile_form {
-	background-color: #ccc;
-	margin: auto;
-	position: relative;
-	width: 88%;
-	padding: 15px;
+    margin: auto;
+    position: relative;
+    width: 90%;
+    padding: 15px;
+	/*background-color: white;
+	
 	border: 2px solid #000;
 	border: inset 1px solid #333;
     border-radius: 15px;
     font-size: 50px;
     color: black;
-    text-align: left;
+    text-align: left;*/
 }
 
 .results {
@@ -161,10 +168,10 @@ a {
 }
 
 .button {
-    background-color: #ccc;
+    background-color: white;
     margin: auto;
     position: relative;
-    width: 85%;
+    width: 100%;
     font-size: 75px;
     padding: 10px;
     border-radius: 15px;
@@ -204,12 +211,12 @@ a {
 }
 
 .song-name {
-    font-size: 30px;
+    font-size: 45px;
     color: #3D352A;
 }
 
 .song-artist {
-    font-size: 18px;
+    font-size: 35px;
     color: #867970;
 }
 
@@ -218,7 +225,7 @@ a {
 }
 
 .vote-count{
-    font-size: 15px;
+    font-size: 25px;
     color: #867970;
     margin-top: 10px;
 }
