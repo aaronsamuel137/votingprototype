@@ -31,7 +31,7 @@
 
                 case 'votes':
                     for (var i = 0; i < 3; i++) {
-                        document.getElementById(update.votes[i][0]).innerHTML=update.votes[i][1];
+                        document.getElementById(i + 1).innerHTML=update.votes[i].votes;
                     }
             }
         };
@@ -59,7 +59,7 @@
         <form action="/queue" method="post">
             Queue:<br>
             {% for song in songs %}
-                <input type="radio" name="remove" value="{{song}}">{{song}}<br />
+                <input type="radio" name="remove" value="{{song['song']}}">{{song['song']}}<br />
             {% endfor %}
             <input type="submit" value="Remove"><br><br>
             Add to Queue:<br>
@@ -74,9 +74,9 @@
     <div class="right">
         <h3>Current Vote:</h3>
         <form action="/vote", method="post" id="votes">
-            {% for song, votes in vote_songs %}
-                <input type="radio" name="vote" value="{{song}}">{{song}}
-                <span class="right_align" id="{{song}}">{{votes}}</span><br>
+            {% for song in vote_songs %}
+                <input type="radio" name="vote" value="{{song['vote_order']}}">{{song['song']}} - {{song['artist']}}
+                <span class="right_align" id="{{song['vote_order']}}">{{song['votes']}}</span><br>
             {% endfor %}
             <input type="hidden" value="a string" name="from_queue">
             <input type="submit" value="Vote!">

@@ -198,3 +198,27 @@ a {
     border: 1px solid #000;
     border: inset 1px solid #333;
 }
+
+.song-img {
+    float: left;
+}
+
+.song-name {
+    font-size: 30px;
+    color: #3D352A;
+}
+
+.song-artist {
+    font-size: 18px;
+    color: #867970;
+}
+
+.song-info {
+    text-align: center;
+}
+
+.vote-count{
+    font-size: 15px;
+    color: #867970;
+    margin-top: 10px;
+}

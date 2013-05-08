@@ -20,7 +20,6 @@
     </div><br><br>
 
     <div id="buttons" class="mobile_form">
-        <strong><span class="left_align">Song</span><span class="right_align">Votes</span></strong><br><br>
         <script type="text/javascript">
             var div = document.getElementById('buttons');
             var obj = {{songs | safe}};
@@ -28,24 +27,51 @@
             for (var i = 0; i < 3; i++) {
                 var btn = document.createElement("BUTTON");
                 btn.setAttribute('class', 'button');
-                btn.setAttribute('id', 'song' + i)
+                btn.setAttribute('id', 'button' + i);
                 if (obj.voted === true)
-                    btn.disabled = true;      
-                var t = document.createTextNode(obj.songs[i][0]);
+                    btn.disabled = true;
+
+                var img = document.createElement("IMG");
+                img.setAttribute('class', 'song-img');
+                img.setAttribute('src', '/static/album_art.jpeg');
+                btn.appendChild(img);
+
+                var info = document.createElement("DIV");
+                info.setAttribute('class', 'song-info');
+                btn.appendChild(info);
+
+                var song_name = document.createElement("DIV");
+                song_name.setAttribute('class', 'song-name');
+                song_name.setAttribute('id', 'song' + i);
+                song_name.innerHTML = obj.songs[i].song;
+                info.appendChild(song_name);
+
+                var artist = document.createElement("DIV");
+                artist.setAttribute('class', 'song-artist');
+                artist.setAttribute('id', 'artist' + i);
+                artist.innerHTML = obj.songs[i].artist;
+                info.appendChild(artist);
+
+                var votes = document.createElement("DIV");
+                votes.setAttribute('class', 'vote-count');
+                votes.setAttribute('id', 'votes' + i);
+                votes.innerHTML = "Current Number of Votes: " + obj.songs[i].votes;
+                info.appendChild(votes);
+
+                //var t = document.createTextNode(obj.songs[i].song);
                 var br = document.createElement("BR");
                 var num_votes = document.createElement("SPAN");
-                num_votes.innerHTML = obj.songs[i][1];
+                //num_votes.innerHTML = obj.songs[i][1];
                 num_votes.setAttribute('class', 'right_align');
                 num_votes.setAttribute('id', 'votes' + i)
-                btn.appendChild(t);
+                //btn.appendChild(t);
                 div.appendChild(btn);
                 div.appendChild(br);
-                div.appendChild(num_votes);
-                div.appendChild(br);                
+                div.appendChild(br);
                 btn.onclick = (function() {
                     var currentI = i;
                     return function() {
-                        document.getElementById("vote").value=obj.songs[currentI][0];
+                        document.getElementById("vote").value = currentI + 1;
                         document.button_submit.submit();
                     }
 

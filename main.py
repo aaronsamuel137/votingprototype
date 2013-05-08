@@ -84,8 +84,13 @@ def counter():
     count += 1
     return count
 
-
 count = 0
+
+class Song:
+    def __init__(self, name, artist):
+        self.name = name
+        self.artist = artist
+
 
 
 ### Handlers ###
@@ -387,8 +392,9 @@ class VoteHandler(MainHandler):
         songs = memcache.get(VOTE)
         if songs:
             for song in songs:
-                if song[0] == vote:
-                    song[1] += 1
+                logging.error(vote)
+                if song['vote_order'] == int(vote):
+                    song['votes'] += 1
                     break
         self.send_update(songs)
         memcache.set(VOTE, songs)
@@ -422,19 +428,28 @@ class QueueHandler(MainHandler):
 
         # If we don't have any songs in queue, add test songs
         if not queue:
+            queue = [{'song': "Thrift Shop", 'artist': "Macklemore"},
+                     {'song': "Thriller", 'artist': "Michael Jackson"},
+                     {'song': "Mirrors", 'artist': "Justin Timberlake"},
+                     {'song': "I'm on a Boat", 'artist': "T-Pain"},
+                     {'song': "Harlem Shake", 'artist': "Baauer"},
+                     {'song': "DeadMau5", 'artist': "Strobe"}]
+            """
             queue = ["Thrift Shop - Macklemore",
                      "Thriller - Michael Jackson",
                      "Mirrors - Justin Timberlake",
                      "I'm on a Boat - T-Pain",
                      "Harlem Shake - Baauer",
                      "DeadMau5 - Strobe"]
+            """
             memcache.set(QUEUE, queue)
 
         # If we don't have a vote ready, add a test vote
         if not vote_songs:
-            vote_songs = [["Awesome Song1", 0],
-                          ["Awesome Song2", 0],
-                          ["Awesome Song3", 0]]
+            vote_songs = [{'song': "Awesome Song1", 'artist': "Awesome Artist1", 'votes': 0, 'vote_order': 1},
+                          {'song': "Awesome Song2", 'artist': "Awesome Artist2", 'votes': 0, 'vote_order': 2},
+                          {'song': "Awesome Song3", 'artist': "Awesome Artist3", 'votes': 0, 'vote_order': 3}]
+
             memcache.set(VOTE, vote_songs)
             self.send_update(vote_songs)
 
@@ -509,7 +524,11 @@ class NextHandler(MainHandler):
         # store new vote data in memcache so it will be broadcast
         # this is the top three songs on queue
         top = songs[:3]
-        vote = [[song, 0] for song in top]
+        vote = []
+        for i, song in enumerate(top):
+            song['votes'] = 0
+            song['vote_order'] = i + 1
+            vote.append(song)
         memcache.set(VOTE, vote)
 
         # update the queue so the top three songs are removed
