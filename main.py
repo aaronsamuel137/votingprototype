@@ -52,6 +52,7 @@ CHANNELS = "channels"
 OLD_CHANNELS = "old channels"
 LIKES = "likes"
 ADMIN = "admin"
+SORTED_LIKES = "likes_by_number"
 
 # This is the event name the will be stored in the db
 EVENT = "testing"
@@ -86,6 +87,7 @@ def counter():
 
 count = 0
 has_voted = {}
+tokens = {}
 
 
 ### Handlers ###
@@ -116,7 +118,7 @@ class MainHandler(webapp2.RequestHandler):
         if not cookie:
             cookie = util.make_cookie(20)
             self.response.headers.add_header('Set-Cookie', 'admin=%s; Path=/' % cookie)
-            
+
             admin_channels = memcache.get(ADMIN)
             if admin_channels: 
                 admin_channels.append(cookie + ADMIN_KEY)
@@ -249,9 +251,11 @@ class FBLoginHandler(MainHandler):
 
             # update list of likes for dataview
             likes_list = memcache.get(LIKES)
-            likes_list = {}
+            if not likes_list:
+                likes_list = {}
             likes_list[profile['name']] = music_likes
             memcache.set(LIKES, likes_list)
+            util.sort_likes()
 
             # add user to db
             user = User(key_name = str(profile['id']),
@@ -278,15 +282,18 @@ class LogoutHandler(MainHandler):
         fb_user = self.current_user
         channels = memcache.get(CHANNELS)
         if fb_user:
-            channels.pop(fb_user.id + CHANNEL_KEY, None)
+            if channels:
+                channels.pop(fb_user.id + CHANNEL_KEY, None)
             util.set_cookie(self.response, "fb_user", "") #expires=time.time() - 86400)       
             likes = memcache.get(LIKES)
-            likes.pop(fb_user.name, None)
+            if likes:
+                likes.pop(fb_user.name, None)
             memcache.set(LIKES, likes)
             self.update_facebook_likes()
         else:
             cookie = self.request.cookies.get('user')
-            channels.pop(cookie + CHANNEL_KEY, None)
+            if channels:
+                channels.pop(cookie + CHANNEL_KEY, None)
             self.response.headers.add_header('Set-Cookie', 'user=%s; Path=/' % '')
             self.update_channels()
         memcache.set(CHANNELS, channels)
@@ -311,19 +318,31 @@ class VoteHandler(MainHandler):
         fb_user = self.current_user
         user_cookie = self.request.cookies.get('user')
         if fb_user:
-            welcome = "Welcome " + fb_user.name + "!"
-            token, client_id = self.get_token_fb(fb_user)           
+            welcome = "You are logged in as " + fb_user.name
+            token = tokens.get(fb_user.id)
+            if not token:
+                token, client_id = self.get_token_fb(fb_user)     
+                tokens[fb_user.id] = token
+                has_voted[token] = False
         
-        # check if anonymous login   
+        # check if anonymous login
         elif user_cookie:
-            welcome = "Logged in"
-            token, client_id = self.get_token()
+            welcome = "You are logged in anonymously"
+            token = tokens.get(user_cookie)
+            if not token:
+                token, client_id = self.get_token()
+                tokens[user_cookie] = token
+                has_voted[token] = False
 
+        
         # if not logged in redirect to login
         else:
             token = None
             welcome = None
             self.redirect('/login')
+
+        logging.error("vote token: " +  str(token))
+        logging.error("vote tokens:" +  str(tokens))
 
         # get the current vote or redirect to no vote page
         songs = memcache.get(VOTE)
@@ -344,12 +363,18 @@ class VoteHandler(MainHandler):
         user_cookie = self.request.cookies.get('user')
         if fb_user:
             welcome = "Welcome " + fb_user.name + "!"
-            token, client_id = self.get_token_fb(fb_user)
+            token = tokens.get(fb_user.id)
+            if not token:
+                token, client_id = self.get_token_fb(fb_user)
+                tokens[fb_user.id] = token
         
         # check if anonymous login   
         elif user_cookie:
             welcome = "Logged in"
-            token, client_id = self.get_token()
+            token = tokens.get(user_cookie)
+            if not token:
+                token, client_id = self.get_token()
+                tokens[user_cookie] = token
 
         # if not logged in redirect to login
         else:
@@ -381,8 +406,8 @@ class VoteHandler(MainHandler):
         # else make sure people can't vote twice
         # and render the vote page again
         elif vote:
-            if not has_voted.get(client_id):
-                has_voted[client_id] = True
+            if not has_voted.get(token):
+                has_voted[token] = True
                 self.vote(vote)
 
             voted = True
@@ -407,7 +432,7 @@ class NoVoteHandler(MainHandler):
     def get(self):
         fb_user = self.current_user
         if fb_user:
-            token, client_id = self.get_token_fb()
+            token, client_id = self.get_token_fb(fb_user)
         else:
             token, client_id = self.get_token()
         self.render('/no_vote.html', token = token)
@@ -427,7 +452,11 @@ class QueueHandler(MainHandler):
         util.tz_adjust(suggestions)
 
         # our token for channel communication
-        token = self.get_admin_token()
+        cookie = self.request.cookies.get('admin')
+        token = tokens.get(cookie)
+        if not token:
+            token = self.get_admin_token()
+            tokens[cookie] = token
 
         # If we don't have any songs in queue, add test songs
         if not queue:
@@ -449,15 +478,20 @@ class QueueHandler(MainHandler):
             self.send_update(vote_songs)
 
         users = memcache.get(CHANNELS)
-        likes = memcache.get(LIKES)
-        if not likes:
-            likes = {'No Facebook logins': []}
+        likes = memcache.get(SORTED_LIKES)
+        if likes:
+            length = len(likes)
+        else:
+            length = 0
+            likes = []
+            
         self.render('queue.html', songs = queue,
                                   vote_songs = vote_songs,
                                   token = token,
                                   users = users,
                                   suggestions = suggestions,
-                                  likes = likes)
+                                  likes = likes,
+                                  length = length)
                                   #vote_db = vote_db)
 
     def post(self):
@@ -488,14 +522,14 @@ class QueueHandler(MainHandler):
         index = self.validate_position(index, len(queue))
 
         # add new song to queue
-        if name:
-            if artist:
-                song = [name, artist]
-                queue.insert(index, ' - '.join(song))
-            else:
-                queue.insert(index, name)
+        if name and artist:
+            song = [name, artist]
+            queue.insert(index, {'song': name, 'artist': artist})
             memcache.set(QUEUE, queue)
-            self.redirect('/queue')
+        else:
+            message = "name and artist required"
+
+        self.redirect('/queue')
 
     # helper function, makes sure position is an int
     # if not just return last index of queue by default
@@ -537,6 +571,7 @@ class NextHandler(MainHandler):
             has_voted[client] = False
 
         # send message to all channels to update
+        logging.error(vote)
         self.send_update(vote, True, old_vote)
 
         self.redirect('/queue')

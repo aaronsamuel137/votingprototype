@@ -106,11 +106,12 @@
     <div class="left">
         <h3>Facebook likes</h3>
         <div id="likes">
-            {% for user in likes %}
-                {{user | safe}}
-                {% for like in likes[user] %}
+            {% for i in range(1, length + 1) %}
+                Music with {{i}} like(s):
+                {% for like in likes[i] %}
                     <span class="right_align">{{like | safe}}</span><br>
                 {% endfor %}
+                <br>
             {% endfor %}
         </div>
     </div>

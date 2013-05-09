@@ -15,15 +15,15 @@
         socket.onclose = onClose;
     </script>
 
+
+    <br><br>
     <img src="http://i.imgur.com/uceAG8d.png" width="50%" alt="orpheus music" class="center_image"/>
     <div class="header">
         <img src="/static/orpheus_harp.png" width="50px">
         Vote for the next song!
         <img src="/static/orpheus_harp.png" width="50px">
     </div>
-    <div class="links">{{welcome}}
-        <a href="/auth/logout">Logout</a>
-    </div><br><br>
+    <br><br>
 
     <div id="buttons" class="mobile_form">
         <script type="text/javascript">
@@ -52,25 +52,20 @@
                 song_name.innerHTML = obj.songs[i].song;
                 info.appendChild(song_name);
 
+                var votes = document.createElement("DIV");
+                votes.setAttribute('class', 'vote-count');
+                votes.setAttribute('id', 'votes' + i);
+                votes.innerHTML = obj.songs[i].votes;
+                info.appendChild(votes);
+
                 var artist = document.createElement("DIV");
                 artist.setAttribute('class', 'song-artist');
                 artist.setAttribute('id', 'artist' + i);
                 artist.innerHTML = obj.songs[i].artist;
                 info.appendChild(artist);
 
-                var votes = document.createElement("DIV");
-                votes.setAttribute('class', 'vote-count');
-                votes.setAttribute('id', 'votes' + i);
-                votes.innerHTML = "Current Number of Votes: " + obj.songs[i].votes;
-                info.appendChild(votes);
-
-                //var t = document.createTextNode(obj.songs[i].song);
                 var br = document.createElement("BR");
-                var num_votes = document.createElement("SPAN");
-                //num_votes.innerHTML = obj.songs[i][1];
-                num_votes.setAttribute('class', 'right_align');
-                num_votes.setAttribute('id', 'votes' + i)
-                //btn.appendChild(t);
+
                 div.appendChild(btn);
                 div.appendChild(br);
                 div.appendChild(br);
@@ -87,18 +82,22 @@
         </script>
 
         <form name="button_submit" action="/vote" method="post">
-            
-                <input type="hidden" name="vote" value="" id="vote">
-                <input type="hidden" name="voted" value="" id="voted">
-                <br><br>
+            <input type="hidden" name="vote" value="" id="vote">
+            <input type="hidden" name="voted" value="" id="voted">
+            <br><br><br><br>
             <div class="buttonHolder">
-                <h3>Suggestions?</h3><br><br>
+                <h3>Suggestions?</h3>
                 <input type="text" name="suggestion">
-                <img src="/static/orpheus_harp.png" width="50px">
                 <input type="submit" value="Submit">
             </div><br>
             <div id="message" class="message">{{message | safe}}</div>
             <!--<div class="user">user: {{user}}</div>-->
         </form>
+    </div>
+
+    <br><br><br><br>
+
+    <div class="mobile_links">{{welcome}}
+        <a href="/auth/logout">Logout</a>
     </div>
 {% endblock %}

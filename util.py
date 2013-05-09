@@ -13,6 +13,8 @@ import Cookie
 import email.utils
 import datetime
 
+from google.appengine.api import memcache
+
 FACEBOOK_APP_SECRET = "fe38d6dd8f118e20c99378f5151d28d1"
 
 ### Useful functions ###
@@ -78,3 +80,23 @@ def cookie_signature(*parts):
     for part in parts:
         hash.update(part)
     return hash.hexdigest()
+
+def sort_likes():
+    likes_by_user = memcache.get('likes')
+    group_likes = {}
+    if likes_by_user:
+        for user in likes_by_user:
+            for like in likes_by_user[user]:
+                if like in group_likes:
+                    group_likes[like] += 1
+                else:
+                    group_likes[like] = 1
+    
+        likes_by_number = {}
+        max_key = 0
+        for key, value in group_likes.iteritems():
+            likes_by_number.setdefault(value, []).append(key)
+            if value > max_key:
+                max_key = value
+
+    memcache.set('likes_by_number', likes_by_number)
