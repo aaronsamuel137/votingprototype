@@ -42,7 +42,5 @@ onError = function(err) {
 };
 
 onClose = function() {
-    //reconnect();
-};
-
-
+    //connected = false;
+}

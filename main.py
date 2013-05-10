@@ -52,6 +52,7 @@ CHANNELS = "channels"
 LIKES = "likes"
 ADMIN = "admin"
 SORTED_LIKES = "likes_by_number"
+OLD_COOKIES = 'old_cookies'
 
 # This is the event name the will be stored in the db
 EVENT = "testing"
@@ -129,6 +130,8 @@ class MainHandler(webapp2.RequestHandler):
         if not channels:
             channels = {}
 
+        logging.error(channels)
+
         if is_admin:
             if not admin_cookie:
                 admin_cookie = util.make_cookie(20)
@@ -155,38 +158,38 @@ class MainHandler(webapp2.RequestHandler):
             if fb_user.id in channels:
                 return self.existing_token(channels, fb_user.id, 'facebook')
 
-            client_id = fb_user.id + CHANNEL_KEY
-            token = channel.create_channel(client_id)
-            name = fb_user.name
-            channel_id = fb_user.id
-            user_type = 'facebook'
+            else:
+                client_id = fb_user.id + CHANNEL_KEY
+                token = channel.create_channel(client_id)
+                name = fb_user.name
+                channel_id = fb_user.id
+                user_type = 'facebook'
 
         elif user_cookie:
             if user_cookie in channels:
                 return self.existing_token(channels, user_cookie, 'anonymous')
 
-            client_id = user_cookie + CHANNEL_KEY
-            token = channel.create_channel(client_id)
-            name = "User" + str(counter())
-            channel_id = user_cookie
-            user_type = 'anonymous'
+            else:
+                client_id = user_cookie + CHANNEL_KEY
+                token = channel.create_channel(client_id)
+                name = "User" + str(counter())
+                channel_id = user_cookie
+                user_type = 'anonymous'
         
         else:
             token = channel_id = client_id = name = user_type = None
             self.redirect('/login')
 
-        channels = memcache.get(CHANNELS)
-        if not channels:
-            channels = {}
         if channel_id and channel_id not in channels:
             channels[channel_id] = {'token': token,
                                     'client_id': client_id,
                                     'admin': is_admin,
                                     'name': name,
                                     'inactive': False}
-
-        self.update_channels()
+        
         memcache.set(CHANNELS, channels)
+        self.update_channels()
+        logging.error(channels)
         return token, user_type
 
     def existing_token(self, channels, channel_id, user_type):
@@ -290,7 +293,6 @@ class FBLoginHandler(MainHandler):
             user = graph.get_object('me')
             likes = graph.get_object(user['id'] + '/music')
             music_likes = [like['name'] for like in likes['data']]
-            util.sort_likes()
 
             # update list of likes for dataview
             likes_list = memcache.get(LIKES)
@@ -298,6 +300,7 @@ class FBLoginHandler(MainHandler):
                 likes_list = {}
             likes_list[profile['name']] = music_likes
             memcache.set(LIKES, likes_list)
+            util.sort_likes()
 
             # add user to db
             user = User(key_name = str(profile['id']),
@@ -323,38 +326,33 @@ class FBLoginHandler(MainHandler):
 class LogoutHandler(MainHandler):
     def get(self):
         channels = memcache.get(CHANNELS)
+        if channels:
 
-        # If FB login
-        fb_user = self.current_user       
-        if fb_user:
-            if channels:
-                token = tokens.get(fb_user.id)
-                if token:
-                    channels.pop(token, None)
-                    tokens.pop(fb_user.id, None)
-
-            util.set_cookie(self.response, "fb_user", "") #expires=time.time() - 86400)       
-            likes = memcache.get(LIKES)
-            if likes:
-                likes.pop(fb_user.name, None)
-                util.sort_likes()
-
-            memcache.set(LIKES, likes)
-            self.update_facebook_likes()
-            
-        # If anonymous login
-        else:
+            # If FB login
+            fb_user = self.current_user
             cookie = self.request.cookies.get('user')
-            if channels:
-                token = tokens.get(cookie)
-                if token:
-                    channels.pop(token, None)
-                    tokens.pop(cookie, None)
-            self.response.headers.add_header('Set-Cookie', 'user=%s; Path=/' % '')   
+            if fb_user:
+                channel_id = fb_user.id
+                util.set_cookie(self.response, "fb_user", "")     
+                likes = memcache.get(LIKES)
+                if likes:
+                    likes.pop(fb_user.name, None)
+                    util.sort_likes()
+                    memcache.set(LIKES, likes)
+            
+            # If anonymous login
+            else:
+                channel_id = cookie
+                self.response.headers.add_header('Set-Cookie', 'user=%s; Path=/' % '')
+
+            for channel in channels:
+                if channel == channel_id:
+                    channels.pop(channel, None)                    
+                    memcache.set(CHANNELS, channels)
+                    self.update_channels()
+                    break
+             
             self.update_channels()
-
-
-        memcache.set(CHANNELS, channels)
         self.redirect('/login')
 
 class LandingHandler(MainHandler):
@@ -414,8 +412,6 @@ class VoteHandler(MainHandler):
             # and render the vote page again
             elif vote:
                 if not has_voted.get(token):
-                    logging.error(has_voted)
-                    logging.error(token)
                     has_voted[token] = True
                     self.vote(vote)
                 else:
@@ -453,11 +449,7 @@ class VoteHandler(MainHandler):
 
 class NoVoteHandler(MainHandler):
     def get(self):
-        fb_user = self.current_user
-        if fb_user:
-            token = self.get_token_fb(fb_user)
-        else:
-            token = self.get_token()
+        token, user_type = self.get_token()
         self.render('/no_vote.html', token = token)
 
 
@@ -590,7 +582,6 @@ class NextHandler(MainHandler):
 # mostly for testing purposes
 class ClearHandler(MainHandler):
     def post(self):
-        memcache.set(TOKENS, {})
         channels = memcache.get(CHANNELS)
         if channels:
             for user in channels:
@@ -604,6 +595,10 @@ class ClearHandler(MainHandler):
                 self.response.headers.add_header('Set-Cookie', 'admin=%s; Path=/' % '')
             memcache.set(ADMIN, [])
 
+        global count
+        count = 0
+        memcache.set(LIKES, {})
+        memcache.set(SORTED_LIKES, {})
         self.redirect('/queue')
 
 # For testing
@@ -633,19 +628,19 @@ class ChannelConnectedHandler(MainHandler):
 
 # if a channel disconnects, update the dataview
 class ChannelDisconnectedHandler(MainHandler):
+    pass
+    """
     def post(self):
-        pass
-        """
         client_id = self.request.get('from')
         channels = memcache.get(CHANNELS)
         if channels and client_id:
             for channel in channels:
                 if channels[channel]['client_id'] == client_id:
-                    channels[channel]['inactive'] = True
+                    channels.pop(channel, None)
                     self.update_channels()
                     memcache.set(CHANNELS, channels)
                     break
-        """
+    """
 
     
 
