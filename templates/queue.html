@@ -14,21 +14,6 @@
                     document.location.reload(true);
                     break;
 
-                    /*var div = document.getElementById('likes');
-                    for (var user in update.likes) {
-                        var name = document.createElement("SPAN");
-                        name.innerHTML = user;
-                        div.appendChild(name);
-                        for (var j = 0; j < user.length; j++) {
-                            var like = document.createElement("SPAN");
-                            like.setAttribute('class', 'right_align');
-                            like.innerHTML = update.likes.user[i];
-                            div.appendChild(like);
-                            var br = document.createElement("BR");
-                            div.appendChild(br);
-                        }
-                    }*/
-
                 case 'votes':
                     for (var i = 0; i < update.votes.length; i++) {
                         document.getElementById(i + 1).innerHTML=update.votes[i].votes;
@@ -64,10 +49,10 @@
             <input type="submit" value="Remove"><br><br>
             Add to Queue:<br>
             Name: <input type="text" name="name" /><br>
-            Artist: <input type="text" name="artist" /> (optional) <br>
-            Genre: <input type="text" name="genre" /> (does nothing yet) <br> 
+            Artist: <input type="text" name="artist" /><br>
             Position: <input type="text" name="position" /> (0-indexed) <br> 
-            <input type="submit" value="Submit">
+            <input type="submit" value="Submit"><br>
+            <div style="text-align: center; color: red">{{message}}</div>
         </form>
     </div>
     <br>
@@ -88,8 +73,8 @@
         </form>
         <br><br><br>
         <h3>Users logged on:</h3>
-        {% for key in users %}
-            {{users[key]}}<br>
+        {% for user in users %}
+            {{user}}<br>
         {% endfor %}
         <br>
         <form action="/clear" method="post">

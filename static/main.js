@@ -18,6 +18,7 @@ onMessage = function(message) {
 
             var btn = document.getElementById('button' + i);
             btn.disabled = false;
+            btn.style.background='white';
 
             document.getElementById('message').innerHTML = "";
             btn.onclick = (function() {

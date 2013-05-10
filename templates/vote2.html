@@ -34,8 +34,6 @@
                 var btn = document.createElement("BUTTON");
                 btn.setAttribute('class', 'button');
                 btn.setAttribute('id', 'button' + i);
-                if (obj.voted === true)
-                    btn.disabled = true;
 
                 var img = document.createElement("IMG");
                 img.setAttribute('class', 'song-img');
@@ -66,6 +64,11 @@
 
                 var br = document.createElement("BR");
 
+                if (obj.voted === true) {
+                    btn.disabled = true;
+                    btn.style.background='grey';
+                }
+
                 div.appendChild(btn);
                 div.appendChild(br);
                 div.appendChild(br);
@@ -84,7 +87,7 @@
         <form name="button_submit" action="/vote" method="post">
             <input type="hidden" name="vote" value="" id="vote">
             <input type="hidden" name="voted" value="" id="voted">
-            <br><br><br><br>
+            <br><br>
             <div class="buttonHolder">
                 <h3>Suggestions?</h3>
                 <input type="text" name="suggestion">
@@ -95,7 +98,7 @@
         </form>
     </div>
 
-    <br><br><br><br>
+    <br><br>
 
     <div class="mobile_links">{{welcome}}
         <a href="/auth/logout">Logout</a>

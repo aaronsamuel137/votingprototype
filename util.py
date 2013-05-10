@@ -99,4 +99,6 @@ def sort_likes():
             if value > max_key:
                 max_key = value
 
-    memcache.set('likes_by_number', likes_by_number)
+        memcache.set('likes_by_number', likes_by_number)
+    else:
+        memcache.set('likes_by_number', {})
